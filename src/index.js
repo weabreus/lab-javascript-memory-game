@@ -30,7 +30,6 @@ const memoryGame = new MemoryGame(cards);
 let clickedPairsSpan = document.getElementById("pairs-clicked");
 let guessedPairsSpan = document.getElementById("pairs-guessed");
 let board = document.querySelector("#memory-board");
-let pickedCards = [];
 
 window.addEventListener("load", (event) => {
   let html = "";
@@ -48,53 +47,56 @@ window.addEventListener("load", (event) => {
 
   // Bind the click event of each element to a function
   document.querySelectorAll(".card").forEach((card, key) => {
-    card.addEventListener("click", (e) => {
-      console.log(e);
+    card.addEventListener("click", () => {
       // TODO: write some code here
-      console.log(`Card clicked: ${card}`);
-      card.classList.toggle("turned");
+      if (memoryGame.pickedCards.length < 2) {
+        card.classList.toggle("turned");
 
-      //push selected card name to selected array
-      pickedCards.push(card);
+        //push selected card name to selected array
+        memoryGame.pickedCards.push(card);
 
-      // if length of picked cards is 2 call check if Pair
+        // if length of picked cards is 2 call check if Pair
 
-      if (pickedCards.length === 2) {
-        let checkResult = memoryGame.checkIfPair(
-          ...pickedCards.map((card) => card.getAttribute("data-card-name"))
-        );
+        if (memoryGame.pickedCards.length === 2) {
+          let checkResult = memoryGame.checkIfPair(
+            ...memoryGame.pickedCards.map((card) =>
+              card.getAttribute("data-card-name")
+            )
+          );
 
-        clickedPairsSpan.innerHTML = memoryGame.pairsClicked;
-        if (!checkResult) {
-          setTimeout(() => {
-            pickedCards.forEach((card) =>
-              card.classList.toggle("turned", false)
+          clickedPairsSpan.innerHTML = memoryGame.pairsClicked;
+          if (!checkResult) {
+            setTimeout(() => {
+              memoryGame.pickedCards.forEach((card) =>
+                card.classList.toggle("turned", false)
+              );
+              memoryGame.pickedCards = [];
+            }, 2000);
+          } else {
+            memoryGame.pickedCards.forEach((card) =>
+              card.classList.toggle("blocked")
             );
-            pickedCards = [];
-          }, 2000);
-        } else {
-          pickedCards.forEach((card) => card.classList.toggle("blocked"));
-          pickedCards = [];
-          guessedPairsSpan.innerHTML = memoryGame.pairsGuessed;
-          console.log(memoryGame.pairsGuessed);
-          if (memoryGame.checkIfFinished()) {
-            alert("You won!");
-            memoryGame.shuffleCards();
-            html = '';
-            memoryGame.cards.forEach((pic) => {
-              html += `
+            memoryGame.pickedCards = [];
+            guessedPairsSpan.innerHTML = memoryGame.pairsGuessed;
+            if (memoryGame.checkIfFinished()) {
+              alert("You won!");
+              memoryGame.shuffleCards();
+              html = "";
+              memoryGame.cards.forEach((pic) => {
+                html += `
                 <div class="card" data-card-name="${pic.name}">
                   <div class="back" name="${pic.img}"></div>
                   <div class="front" style="background: url(img/${pic.img}) no-repeat"></div>
                 </div>
               `;
-            });
-            board.innerHTML = html;
+              });
+              board.innerHTML = html;
 
-            memoryGame.pairsClicked = 0;
-            memoryGame.pairsGuessed = 0;
-            clickedPairsSpan.innerHTML = 0;
-            guessedPairsSpan.innerHTML = 0;
+              memoryGame.pairsClicked = 0;
+              memoryGame.pairsGuessed = 0;
+              clickedPairsSpan.innerHTML = 0;
+              guessedPairsSpan.innerHTML = 0;
+            }
           }
         }
       }
